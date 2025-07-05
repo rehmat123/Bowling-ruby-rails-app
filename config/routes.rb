@@ -1,9 +1,14 @@
 Rails.application.routes.draw do
-  resources :games, only: [:create, :show] do
-    member do
-      get :score
+  # API namespace with versioning in URL but non-versioned controllers
+  namespace :api do
+    scope :v1 do
+      resources :games, only: [:create, :show], defaults: { format: :json } do
+        member do
+          get :score
+        end
+        resources :rolls, only: [:create], defaults: { format: :json }
+      end
     end
-    resources :rolls, only: [:create]
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

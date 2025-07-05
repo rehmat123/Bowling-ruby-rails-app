@@ -22,7 +22,7 @@ A Ruby on Rails API for managing and scoring ten-pin bowling games with proper A
 All endpoints are under the `/api` namespace and return JSON format by default.
 
 ### 1. Start a New Game
-- **Endpoint:** `POST /api/games`
+- **Endpoint:** `POST /api/v1/games`
 - **Response:**
   ```json
   {
@@ -31,8 +31,8 @@ All endpoints are under the `/api` namespace and return JSON format by default.
   }
   ```
 
-### 2. Submit a Roll
-- **Endpoint:** `POST /api/games/:game_id/rolls`
+### 3. Submit a Roll
+- **Endpoint:** `POST /api/v1/games/:game_id/rolls`
 - **Body:**
   ```json
   {
@@ -58,8 +58,8 @@ All endpoints are under the `/api` namespace and return JSON format by default.
   }
   ```
 
-### 3. Get Current Game Score
-- **Endpoint:** `GET /api/games/:id/score`
+### 4. Get Current Game Score
+- **Endpoint:** `GET /api/v1/games/:id/score`
 - **Response:**
   ```json
   {
@@ -68,8 +68,8 @@ All endpoints are under the `/api` namespace and return JSON format by default.
   }
   ```
 
-### 4. Get Game Information
-- **Endpoint:** `GET /api/games/:id`
+### 5. Get Game Information
+- **Endpoint:** `GET /api/v1/games/:id`
 - **Response:**
   ```json
   {
@@ -86,24 +86,24 @@ All endpoints are under the `/api` namespace and return JSON format by default.
 
 ### Start a new game:
 ```bash
-curl -X POST http://localhost:3000/api/games
+curl -X POST http://localhost:3000/api/v1/games
 ```
 
 ### Submit a roll:
 ```bash
 curl -X POST -H "Content-Type: application/json" \
   -d '{"roll": {"pins": 8}}' \
-  http://localhost:3000/api/games/1/rolls
+  http://localhost:3000/api/v1/games/1/rolls
 ```
 
 ### Get current score:
 ```bash
-curl http://localhost:3000/api/games/1/score
+curl http://localhost:3000/api/v1/games/1/score
 ```
 
 ### Get game info:
 ```bash
-curl http://localhost:3000/api/games/1
+curl http://localhost:3000/api/v1/games/1
 ```
 
 ## Bowling Rules Implementation

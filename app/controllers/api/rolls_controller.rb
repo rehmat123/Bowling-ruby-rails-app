@@ -18,10 +18,11 @@ module Api
       end
       
       game = Game.find(params[:game_id])
+      frames = game.frames.order(:number)
       
-      frame = game.frames.order(:number).detect do |f|
-        can_roll_in_frame?(f)
-      end
+
+      # Find the first frame that can accept a roll
+      frame = frames.detect { |f| can_roll_in_frame?(f) }
       
       if frame.nil?
         render json: { 
@@ -65,7 +66,6 @@ module Api
     # Determines if a roll can be made in this frame
     def can_roll_in_frame?(frame)
       rolls = frame.rolls.order(:roll_number)
-      return false if rolls.count >= (frame.number == 10 ? 3 : 2)
       
       # For frame 10, check if it's complete
       if frame.number == 10

@@ -1,8 +1,6 @@
+require Rails.root.join("app/lib/bowling_rules")
+
 class GameStateService
-  MAX_FRAMES = 10
-  MAX_PINS = 10
-  MAX_ROLLS_REGULAR = 2
-  MAX_ROLLS_TENTH_WITH_STRIKE_OR_SPARE = 3
   def initialize(game, frames = nil)
     @game = game
     @frames = frames
@@ -10,7 +8,7 @@ class GameStateService
 
   # Check if the game is in a valid state
   def valid_game_state?
-    @frames.length == MAX_FRAMES && @frames.all? { |f| f.number <= 10 }
+    @frames.length == BowlingRules::MAX_FRAMES && @frames.all? { |f| f.number <= BowlingRules::MAX_FRAMES }
   end
 
   # Find the first frame that can accept a roll
@@ -22,7 +20,7 @@ class GameStateService
   def can_roll_in_frame?(frame)
     rolls = ordered_rolls_for(frame)
 
-    if frame.number == MAX_FRAMES
+    if frame.number == BowlingRules::MAX_FRAMES
       !frame_complete_10th?(rolls)
     else
       !frame_complete_regular?(rolls)
@@ -43,7 +41,7 @@ class GameStateService
 
   def frame_complete?(frame)
     rolls = ordered_rolls_for(frame)
-    frame.number == MAX_FRAMES ? frame_complete_10th?(rolls) : frame_complete_regular?(rolls)
+    frame.number == BowlingRules::MAX_FRAMES ? frame_complete_10th?(rolls) : frame_complete_regular?(rolls)
   end
 
   def ordered_rolls_for(frame)
@@ -72,9 +70,9 @@ class GameStateService
   def frame_complete_regular?(rolls)
     return false if rolls.empty?
 
-    if rolls.first.pins == MAX_PINS # Strike
+    if rolls.first.pins == BowlingRules::MAX_PINS # Strike
       true
-    elsif rolls.length >= MAX_ROLLS_REGULAR
+    elsif rolls.length >= BowlingRules::MAX_ROLLS_PER_FRAME
       true
     else
       false
@@ -87,10 +85,10 @@ class GameStateService
     first = rolls[0]&.pins || 0
     second = rolls[1]&.pins || 0
 
-    if first == MAX_PINS || (first + second == MAX_PINS)
-        rolls.length >= MAX_ROLLS_TENTH_WITH_STRIKE_OR_SPARE
+    if first == BowlingRules::MAX_PINS || (first + second == BowlingRules::MAX_PINS)
+      rolls.length >= BowlingRules::MAX_ROLLS_TENTH_FRAME
     else
-        rolls.length >= MAX_ROLLS_REGULAR
+      rolls.length >= BowlingRules::MAX_ROLLS_PER_FRAME
     end
   end
 

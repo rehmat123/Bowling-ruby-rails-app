@@ -1,3 +1,5 @@
+require Rails.root.join("app/lib/bowling_rules")
+
 class ScoreCalculator
   def initialize(game, frames = nil, rolls = nil)
     @game = game
@@ -11,7 +13,7 @@ class ScoreCalculator
     total = 0
     roll_index = 0
 
-    10.times do |frame_number|
+    BowlingRules::MAX_FRAMES.times do |frame_number|
       frame_score = calculate_frame_score(frame_number, roll_index)
       frame_scores << frame_score
       total += frame_score
@@ -46,18 +48,18 @@ class ScoreCalculator
   # Check if current roll is a strike
   def strike?(roll_index)
     return false if roll_index >= @rolls.length
-    @rolls[roll_index].pins == 10
+    @rolls[roll_index].pins == BowlingRules::MAX_PINS
   end
 
   # Check if current two rolls make a spare
   def spare?(roll_index)
     return false if roll_index + 1 >= @rolls.length
-    @rolls[roll_index].pins + @rolls[roll_index + 1].pins == 10
+    @rolls[roll_index].pins + @rolls[roll_index + 1].pins == BowlingRules::MAX_PINS
   end
 
   # Calculate score for a strike (10 + next two rolls)
   def calculate_strike_score(roll_index)
-    score = 10
+    score = BowlingRules::MAX_PINS
 
     # Add first bonus roll
     if roll_index + 1 < @rolls.length
@@ -74,7 +76,7 @@ class ScoreCalculator
 
   # Calculate score for a spare (10 + next roll)
   def calculate_spare_score(roll_index)
-    score = 10
+    score = BowlingRules::MAX_PINS
 
     # Add bonus roll
     if roll_index + 2 < @rolls.length
@@ -102,7 +104,7 @@ class ScoreCalculator
 
   # Check if game is complete
   def game_complete?
-    return false if @frames.length != 10
+    return false if @frames.length != BowlingRules::MAX_FRAMES
 
     @frames.all? { |frame| frame_complete?(frame) }
   end
@@ -111,7 +113,7 @@ class ScoreCalculator
   def frame_complete?(frame)
     rolls = frame.rolls.order(:roll_number)
 
-    if frame.number == 10
+    if frame.number == BowlingRules::MAX_FRAMES
       complete_10th_frame?(rolls)
     else
       complete_regular_frame?(rolls)
@@ -123,9 +125,9 @@ class ScoreCalculator
   def complete_regular_frame?(rolls)
     return false if rolls.empty?
 
-    if rolls.first.pins == 10 # Strike
+    if rolls.first.pins == BowlingRules::MAX_PINS # Strike
       true
-    elsif rolls.length >= 2 # Two rolls
+    elsif rolls.length >= BowlingRules::MAX_ROLLS_PER_FRAME # Two rolls
       true
     else
       false
@@ -135,12 +137,12 @@ class ScoreCalculator
   def complete_10th_frame?(rolls)
     return false if rolls.empty?
 
-    if rolls.first.pins == 10 # Strike
-      rolls.length >= 3
-    elsif rolls.length >= 2 && rolls[0].pins + rolls[1].pins == 10 # Spare
-      rolls.length >= 3
+    if rolls.first.pins == BowlingRules::MAX_PINS # Strike
+      rolls.length >= BowlingRules::MAX_ROLLS_TENTH_FRAME
+    elsif rolls.length >= BowlingRules::MAX_ROLLS_PER_FRAME && rolls[0].pins + rolls[1].pins == BowlingRules::MAX_PINS # Spare
+      rolls.length >= BowlingRules::MAX_ROLLS_TENTH_FRAME
     else # Open frame
-      rolls.length >= 2
+      rolls.length >= BowlingRules::MAX_ROLLS_PER_FRAME
     end
   end
 end

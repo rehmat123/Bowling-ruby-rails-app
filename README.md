@@ -287,6 +287,9 @@ All business logic is implemented in a dedicated service layer (not in models):
 - **GameStateService** (`app/services/game_state_service.rb`): Determines game state, frame completion, next roll number, and provides game info in a structured format.
 - **RollValidatorService** (`app/services/roll_validator_service.rb`): Validates roll input, enforces bowling rules for each frame, and provides detailed error messages for invalid rolls.
 
+**Shared Constants:**
+- **BowlingRules** (`app/lib/bowling_rules.rb`): Centralized module containing all bowling game constants (MAX_PINS, MAX_FRAMES, etc.) used across services for consistency and maintainability.
+
 Controllers are thin and delegate all business logic to these services.
 
 ## Testing

@@ -87,7 +87,7 @@ RSpec.describe RollValidatorService, type: :service do
     end
     it 'returns error for roll_number out of range' do
       validator = RollValidatorService.new(regular_frame, 4, 5)
-      expect(validator.validation_errors).to include("Roll number must be between 1 and 3")
+      expect(validator.validation_errors).to include("Roll number must be between 1 and 2")
     end
     it 'returns error for second roll after strike' do
       regular_frame.rolls.create!(roll_number: 1, pins: 10)

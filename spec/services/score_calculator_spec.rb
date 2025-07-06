@@ -18,40 +18,40 @@ RSpec.describe ScoreCalculator, type: :service do
 
   describe '#calculate_score' do
     it 'returns 0 for a new game' do
-      expect(service.calculate_score).to eq({ frame_scores: [0]*10, total_score: 0 })
+      expect(service.calculate_score).to eq({ frame_scores: [ 0 ]*10, total_score: 0 })
     end
 
     it 'scores a perfect game' do
       # 12 strikes
-      add_rolls(Array.new(9) { [10] } + [[10,10,10]])
+      add_rolls(Array.new(9) { [ 10 ] } + [ [ 10, 10, 10 ] ])
       expect(service.calculate_score[:total_score]).to eq(300)
-      expect(service.calculate_score[:frame_scores]).to eq([30]*10)
+      expect(service.calculate_score[:frame_scores]).to eq([ 30 ]*10)
     end
 
     it 'scores a gutter game' do
-      add_rolls(Array.new(10) { [0,0] })
+      add_rolls(Array.new(10) { [ 0, 0 ] })
       expect(service.calculate_score[:total_score]).to eq(0)
-      expect(service.calculate_score[:frame_scores]).to eq([0]*10)
+      expect(service.calculate_score[:frame_scores]).to eq([ 0 ]*10)
     end
 
     it 'scores a game with all spares (5,5 + 5)' do
-      add_rolls(Array.new(9) { [5,5] } + [[5,5,5]])
+      add_rolls(Array.new(9) { [ 5, 5 ] } + [ [ 5, 5, 5 ] ])
       expect(service.calculate_score[:total_score]).to eq(150)
-      expect(service.calculate_score[:frame_scores]).to eq([15]*10)
+      expect(service.calculate_score[:frame_scores]).to eq([ 15 ]*10)
     end
 
     it 'scores a mixed game (strike, spare, open)' do
       add_rolls([
-        [10],      # strike
-        [5,5],     # spare
-        [3,4],     # open
-        [10],      # strike
-        [10],      # strike
-        [2,8],     # spare
-        [0,0],     # open
-        [10],      # strike
-        [1,9],     # spare
-        [10,10,10] # 10th frame
+        [ 10 ],      # strike
+        [ 5, 5 ],     # spare
+        [ 3, 4 ],     # open
+        [ 10 ],      # strike
+        [ 10 ],      # strike
+        [ 2, 8 ],     # spare
+        [ 0, 0 ],     # open
+        [ 10 ],      # strike
+        [ 1, 9 ],     # spare
+        [ 10, 10, 10 ] # 10th frame
       ])
       result = service.calculate_score
       expect(result[:frame_scores].length).to eq(10)
@@ -61,40 +61,40 @@ RSpec.describe ScoreCalculator, type: :service do
 
   describe '#strike?' do
     it 'returns true for a strike' do
-      add_rolls([[10]] + Array.new(9) { [0,0] })
+      add_rolls([ [ 10 ] ] + Array.new(9) { [ 0, 0 ] })
       expect(service.strike?(0)).to be true
     end
     it 'returns false for non-strike' do
-      add_rolls([[5,5]] + Array.new(9) { [0,0] })
+      add_rolls([ [ 5, 5 ] ] + Array.new(9) { [ 0, 0 ] })
       expect(service.strike?(0)).to be false
     end
   end
 
   describe '#spare?' do
     it 'returns true for a spare' do
-      add_rolls([[5,5]] + Array.new(9) { [0,0] })
+      add_rolls([ [ 5, 5 ] ] + Array.new(9) { [ 0, 0 ] })
       expect(service.spare?(0)).to be true
     end
     it 'returns false for non-spare' do
-      add_rolls([[3,4]] + Array.new(9) { [0,0] })
+      add_rolls([ [ 3, 4 ] ] + Array.new(9) { [ 0, 0 ] })
       expect(service.spare?(0)).to be false
     end
   end
 
   describe '#total_rolls' do
     it 'returns correct number of rolls' do
-      add_rolls([[10],[5,5],[3,4],[10],[10],[2,8],[0,0],[10],[1,9],[10,10,10]])
+      add_rolls([ [ 10 ], [ 5, 5 ], [ 3, 4 ], [ 10 ], [ 10 ], [ 2, 8 ], [ 0, 0 ], [ 10 ], [ 1, 9 ], [ 10, 10, 10 ] ])
       expect(service.total_rolls).to eq(17)
     end
   end
 
   describe '#game_complete?' do
     it 'returns false for incomplete game' do
-      add_rolls([[10],[5,5]])
+      add_rolls([ [ 10 ], [ 5, 5 ] ])
       expect(service.game_complete?).to be false
     end
     it 'returns true for complete game' do
-      add_rolls(Array.new(9) { [10] } + [[10,10,10]])
+      add_rolls(Array.new(9) { [ 10 ] } + [ [ 10, 10, 10 ] ])
       expect(service.game_complete?).to be true
     end
   end
@@ -143,4 +143,4 @@ RSpec.describe ScoreCalculator, type: :service do
       expect(service.frame_complete?(frame)).to be false
     end
   end
-end 
+end

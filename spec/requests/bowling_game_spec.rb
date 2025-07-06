@@ -6,7 +6,7 @@ RSpec.describe 'Bowling Game API', type: :request do
   describe 'Game Creation' do
     it 'creates a new game successfully' do
       post '/api/v1/games', headers: headers
-      
+
       expect(response).to have_http_status(:created)
       body = JSON.parse(response.body)
       expect(body).to include('game_id', 'message')
@@ -17,10 +17,10 @@ RSpec.describe 'Bowling Game API', type: :request do
     it 'creates 10 frames for a new game' do
       post '/api/v1/games', headers: headers
       game_id = JSON.parse(response.body)['game_id']
-      
+
       get "/api/v1/games/#{game_id}", headers: headers
       body = JSON.parse(response.body)
-      
+
       expect(body['frames'].length).to eq(10)
       expect(body['frames'].map { |f| f['number'] }).to eq((1..10).to_a)
     end
@@ -275,7 +275,7 @@ RSpec.describe 'Bowling Game API', type: :request do
 
       get "/api/v1/games/#{game_id}/score", headers: headers
       body = JSON.parse(response.body)
-      
+
       # Frame 1: 5 + 5 + 5 = 15
       # Frame 2: 5 + 5 + 5 = 15
       # Frame 3: 5 + 4 = 9
@@ -351,7 +351,7 @@ RSpec.describe 'Bowling Game API', type: :request do
         # First roll of frame
         post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 3 } }.to_json, headers: headers
         expect(response).to have_http_status(:created)
-        
+
         # Second roll of frame
         post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 4 } }.to_json, headers: headers
         expect(response).to have_http_status(:created)
@@ -404,7 +404,7 @@ RSpec.describe 'Bowling Game API', type: :request do
       # Try to roll again in the same frame (should succeed as it moves to next frame)
       post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 5 } }.to_json, headers: headers
       expect(response).to have_http_status(:created) # This should succeed as it moves to next frame
-      
+
       # Verify we're in the second frame
       body = JSON.parse(response.body)
       expect(body['frame']).to eq(2)
@@ -477,21 +477,21 @@ RSpec.describe 'Bowling Game API', type: :request do
 
       # Frame 1: Strike
       post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 10 } }.to_json, headers: headers
-      
+
       # Frame 2: 7, 3 (spare)
       post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 7 } }.to_json, headers: headers
       post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 3 } }.to_json, headers: headers
-      
+
       # Frame 3: Strike
       post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 10 } }.to_json, headers: headers
-      
+
       # Frame 4: 4, 6 (spare)
       post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 4 } }.to_json, headers: headers
       post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 6 } }.to_json, headers: headers
 
       get "/api/v1/games/#{game_id}/score", headers: headers
       body = JSON.parse(response.body)
-      
+
       # Frame 1: 10 + 7 + 3 = 20
       # Frame 2: 7 + 3 + 10 = 20
       # Frame 3: 10 + 4 + 6 = 20
@@ -511,7 +511,7 @@ RSpec.describe 'Bowling Game API', type: :request do
 
       get "/api/v1/games/#{game_id}/score", headers: headers
       body = JSON.parse(response.body)
-      
+
       # Frame 1: 10 + 10 + 10 = 30
       # Frame 2: 10 + 10 = 20 (incomplete)
       # Frame 3: 10 = 10 (incomplete)
@@ -527,7 +527,7 @@ RSpec.describe 'Bowling Game API', type: :request do
     it 'returns consistent JSON structure for game creation' do
       post '/api/v1/games', headers: headers
       expect(response).to have_http_status(:created)
-      
+
       body = JSON.parse(response.body)
       expect(body).to have_key('game_id')
       expect(body).to have_key('message')
@@ -541,7 +541,7 @@ RSpec.describe 'Bowling Game API', type: :request do
 
       post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 5 } }.to_json, headers: headers
       expect(response).to have_http_status(:created)
-      
+
       body = JSON.parse(response.body)
       expect(body).to have_key('frame')
       expect(body).to have_key('roll')
@@ -559,7 +559,7 @@ RSpec.describe 'Bowling Game API', type: :request do
 
       get "/api/v1/games/#{game_id}/score", headers: headers
       expect(response).to have_http_status(:ok)
-      
+
       body = JSON.parse(response.body)
       expect(body).to have_key('total_score')
       expect(body).to have_key('frame_scores')
@@ -568,4 +568,4 @@ RSpec.describe 'Bowling Game API', type: :request do
       expect(body['frame_scores'].length).to eq(10)
     end
   end
-end 
+end

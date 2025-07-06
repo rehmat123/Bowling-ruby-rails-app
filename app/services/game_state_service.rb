@@ -21,7 +21,7 @@ class GameStateService
   # Check if a roll can be made in a specific frame
   def can_roll_in_frame?(frame)
     rolls = ordered_rolls_for(frame)
-    
+
     if frame.number == MAX_FRAMES
       !frame_complete_10th?(rolls)
     else
@@ -37,7 +37,7 @@ class GameStateService
   # Check if game is complete
   def game_complete?
     return false unless valid_game_state?
-    
+
     @frames.all? { |frame| frame_complete?(frame) }
   end
 
@@ -71,7 +71,7 @@ class GameStateService
 
   def frame_complete_regular?(rolls)
     return false if rolls.empty?
-    
+
     if rolls.first.pins == MAX_PINS # Strike
       true
     elsif rolls.length >= MAX_ROLLS_REGULAR
@@ -86,10 +86,10 @@ class GameStateService
 
     first = rolls[0]&.pins || 0
     second = rolls[1]&.pins || 0
-    
+
     if first == MAX_PINS || (first + second == MAX_PINS)
         rolls.length >= MAX_ROLLS_TENTH_WITH_STRIKE_OR_SPARE
-      else
+    else
         rolls.length >= MAX_ROLLS_REGULAR
     end
   end
@@ -102,4 +102,4 @@ class GameStateService
       is_complete: frame_complete?(frame)
     }
   end
-end 
+end

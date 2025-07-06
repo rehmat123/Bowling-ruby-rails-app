@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe GameStateService, type: :service do
-  let(:game) { 
+  let(:game) {
     game = Game.create!
     # Create 10 frames for the game
     10.times do |i|
@@ -60,14 +60,14 @@ RSpec.describe GameStateService, type: :service do
       it 'returns the first incomplete frame' do
         # Add a strike to first frame
         game.frames.first.rolls.create!(roll_number: 1, pins: 10)
-        
+
         expect(service.find_available_frame).to eq(game.frames.second)
       end
 
       it 'returns the frame that needs a second roll' do
         # Add first roll to first frame
         game.frames.first.rolls.create!(roll_number: 1, pins: 5)
-        
+
         expect(service.find_available_frame).to eq(game.frames.first)
       end
     end
@@ -86,7 +86,7 @@ RSpec.describe GameStateService, type: :service do
             frame.rolls.create!(roll_number: 3, pins: 10)
           end
         end
-        
+
         expect(service.find_available_frame).to be_nil
       end
     end
@@ -217,7 +217,7 @@ RSpec.describe GameStateService, type: :service do
             frame.rolls.create!(roll_number: 3, pins: 10)
           end
         end
-        
+
         expect(service.game_complete?).to be true
       end
 
@@ -238,7 +238,7 @@ RSpec.describe GameStateService, type: :service do
             frame.rolls.create!(roll_number: 3, pins: 10)
           end
         end
-        
+
         expect(service.game_complete?).to be true
       end
     end
@@ -329,7 +329,7 @@ RSpec.describe GameStateService, type: :service do
       game.frames.first.rolls.create!(roll_number: 1, pins: 10)
       game.frames.second.rolls.create!(roll_number: 1, pins: 5)
       game.frames.second.rolls.create!(roll_number: 2, pins: 3)
-      
+
       expect(service.total_rolls).to eq(3)
     end
 
@@ -345,7 +345,7 @@ RSpec.describe GameStateService, type: :service do
           frame.rolls.create!(roll_number: 3, pins: 10)
         end
       end
-      
+
       expect(service.total_rolls).to eq(12)
     end
   end
@@ -353,7 +353,7 @@ RSpec.describe GameStateService, type: :service do
   describe '#game_info' do
     it 'returns correct structure for empty game' do
       info = service.game_info
-      
+
       expect(info).to include(
         game_id: game.id,
         total_frames: 10,
@@ -367,12 +367,12 @@ RSpec.describe GameStateService, type: :service do
       game.frames.first.rolls.create!(roll_number: 1, pins: 10)
       game.frames.second.rolls.create!(roll_number: 1, pins: 5)
       game.frames.second.rolls.create!(roll_number: 2, pins: 3)
-      
+
       info = service.game_info
-      
+
       expect(info[:total_rolls]).to eq(3)
       expect(info[:is_complete]).to be false
-      expect(info[:frames].first[:rolls]).to eq([{ roll_number: 1, pins: 10 }])
+      expect(info[:frames].first[:rolls]).to eq([ { roll_number: 1, pins: 10 } ])
       expect(info[:frames].first[:is_complete]).to be true
       expect(info[:frames].second[:rolls]).to eq([
         { roll_number: 1, pins: 5 },
@@ -393,9 +393,9 @@ RSpec.describe GameStateService, type: :service do
           frame.rolls.create!(roll_number: 3, pins: 10)
         end
       end
-      
+
       info = service.game_info
-      
+
       expect(info[:total_rolls]).to eq(12)
       expect(info[:is_complete]).to be true
       expect(info[:frames].all? { |f| f[:is_complete] }).to be true
@@ -406,7 +406,7 @@ RSpec.describe GameStateService, type: :service do
     it 'handles game with invalid state gracefully' do
       game.frames.last.destroy # Remove 10th frame
       service = GameStateService.new(game, game.frames.order(:number).includes(:rolls))
-      
+
       expect(service.valid_game_state?).to be false
       expect(service.game_complete?).to be false
     end
@@ -415,10 +415,10 @@ RSpec.describe GameStateService, type: :service do
       frame = game.frames.first
       frame.rolls.create!(roll_number: 2, pins: 5)
       frame.rolls.create!(roll_number: 1, pins: 10)
-      
+
       # Should still work correctly despite roll number order
       expect(service.can_roll_in_frame?(frame)).to be false
       expect(service.frame_complete?(frame)).to be true
     end
   end
-end 
+end

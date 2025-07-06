@@ -14,19 +14,19 @@ class RollValidatorService
   # Get validation errors
   def validation_errors
     errors = []
-    
+
     unless valid_pins?
       errors << "Pins must be between 0 and 10"
     end
-    
+
     unless valid_roll_number?
       errors << "Roll number must be between 1 and 3"
     end
-    
+
     unless valid_frame_rules?
       errors << frame_rule_error_message
     end
-    
+
     errors
   end
 
@@ -76,10 +76,10 @@ class RollValidatorService
 
   def valid_second_roll_regular_frame?
     return false if @existing_rolls.empty?
-    
+
     first_roll = @existing_rolls.first
     return false if first_roll.pins == 10 # Can't have second roll after strike
-    
+
     # Check if second roll would exceed 10 pins
     total_pins = first_roll.pins + @pins
     total_pins <= 10
@@ -87,10 +87,10 @@ class RollValidatorService
 
   def valid_third_roll_10th_frame?
     return false if @existing_rolls.length < 2
-    
+
     first_roll = @existing_rolls[0]
     second_roll = @existing_rolls[1]
-    
+
     # Third roll only allowed if first roll was strike or first two rolls were spare
     first_roll.pins == 10 || (first_roll.pins + second_roll.pins == 10)
   end
@@ -128,7 +128,7 @@ class RollValidatorService
       else
         first_roll = @existing_rolls[0]
         second_roll = @existing_rolls[1]
-        
+
         if first_roll.pins == 10
           "Third roll allowed after strike"
         elsif first_roll.pins + second_roll.pins == 10
@@ -141,4 +141,4 @@ class RollValidatorService
       "Invalid roll number for 10th frame"
     end
   end
-end 
+end

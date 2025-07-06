@@ -10,12 +10,12 @@ class ScoreCalculator
     frame_scores = []
     total = 0
     roll_index = 0
-    
+
     10.times do |frame_number|
       frame_score = calculate_frame_score(frame_number, roll_index)
       frame_scores << frame_score
       total += frame_score
-      
+
       # Move roll index based on frame type
       if strike?(roll_index)
         roll_index += 1
@@ -23,7 +23,7 @@ class ScoreCalculator
         roll_index += 2
       end
     end
-    
+
     {
       frame_scores: frame_scores,
       total_score: total
@@ -33,7 +33,7 @@ class ScoreCalculator
   # Calculate score for a specific frame
   def calculate_frame_score(frame_number, roll_index)
     return 0 if roll_index >= @rolls.length
-    
+
     if strike?(roll_index)
       calculate_strike_score(roll_index)
     elsif spare?(roll_index)
@@ -58,40 +58,40 @@ class ScoreCalculator
   # Calculate score for a strike (10 + next two rolls)
   def calculate_strike_score(roll_index)
     score = 10
-    
+
     # Add first bonus roll
     if roll_index + 1 < @rolls.length
       score += @rolls[roll_index + 1].pins
     end
-    
+
     # Add second bonus roll
     if roll_index + 2 < @rolls.length
       score += @rolls[roll_index + 2].pins
     end
-    
+
     score
   end
 
   # Calculate score for a spare (10 + next roll)
   def calculate_spare_score(roll_index)
     score = 10
-    
+
     # Add bonus roll
     if roll_index + 2 < @rolls.length
       score += @rolls[roll_index + 2].pins
     end
-    
+
     score
   end
 
   # Calculate score for an open frame (sum of two rolls)
   def calculate_open_frame_score(roll_index)
     score = @rolls[roll_index].pins
-    
+
     if roll_index + 1 < @rolls.length
       score += @rolls[roll_index + 1].pins
     end
-    
+
     score
   end
 
@@ -103,14 +103,14 @@ class ScoreCalculator
   # Check if game is complete
   def game_complete?
     return false if @frames.length != 10
-    
+
     @frames.all? { |frame| frame_complete?(frame) }
   end
 
   # Check if a specific frame is complete
   def frame_complete?(frame)
     rolls = frame.rolls.order(:roll_number)
-    
+
     if frame.number == 10
       complete_10th_frame?(rolls)
     else
@@ -122,7 +122,7 @@ class ScoreCalculator
 
   def complete_regular_frame?(rolls)
     return false if rolls.empty?
-    
+
     if rolls.first.pins == 10 # Strike
       true
     elsif rolls.length >= 2 # Two rolls
@@ -134,7 +134,7 @@ class ScoreCalculator
 
   def complete_10th_frame?(rolls)
     return false if rolls.empty?
-    
+
     if rolls.first.pins == 10 # Strike
       rolls.length >= 3
     elsif rolls.length >= 2 && rolls[0].pins + rolls[1].pins == 10 # Spare
@@ -143,4 +143,4 @@ class ScoreCalculator
       rolls.length >= 2
     end
   end
-end 
+end

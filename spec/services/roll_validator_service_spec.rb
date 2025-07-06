@@ -122,4 +122,4 @@ RSpec.describe RollValidatorService, type: :service do
       expect(validator.validation_errors).to eq([])
     end
   end
-end 
+end

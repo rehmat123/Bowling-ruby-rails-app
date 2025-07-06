@@ -9,7 +9,11 @@ RSpec.describe GameStateService, type: :service do
     end
     game
   }
-  let(:service) { GameStateService.new(game, game.frames.order(:number).includes(:rolls)) }
+  let(:service) { 
+    frames = game.frames.order(:number).includes(:rolls)
+    score_calculator = ScoreCalculator.new(game, frames)
+    GameStateService.new(game, frames, score_calculator) 
+  }
 
   describe '#initialize' do
     it 'initializes with a game' do
@@ -405,7 +409,9 @@ RSpec.describe GameStateService, type: :service do
   describe 'edge cases' do
     it 'handles game with invalid state gracefully' do
       game.frames.last.destroy # Remove 10th frame
-      service = GameStateService.new(game, game.frames.order(:number).includes(:rolls))
+      frames = game.frames.order(:number).includes(:rolls)
+      score_calculator = ScoreCalculator.new(game,frames)
+      service = GameStateService.new(game, frames, score_calculator)
 
       expect(service.valid_game_state?).to be false
       expect(service.game_complete?).to be false

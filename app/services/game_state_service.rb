@@ -1,9 +1,10 @@
 require Rails.root.join("app/lib/bowling_rules")
 
 class GameStateService
-  def initialize(game, frames = nil)
+  def initialize(game, frames, score_calculator)
     @game = game
     @frames = frames
+    @score_calculator = score_calculator
   end
 
   # Check if the game is in a valid state
@@ -54,13 +55,17 @@ class GameStateService
     @frames.sum { |frame| frame.rolls.count }
   end
 
-  # Get game information
+  # Get game information including scores
   def game_info
+    score_data = @score_calculator.calculate_score
+    
     {
       game_id: @game.id,
       total_frames: @frames.length,
       total_rolls: total_rolls,
       is_complete: game_complete?,
+      total_score: score_data[:total_score],
+      frame_scores: score_data[:frame_scores],
       frames: @frames.map { |frame| frame_info(frame) }
     }
   end

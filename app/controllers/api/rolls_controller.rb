@@ -21,7 +21,8 @@ module Api
 
       game = Game.find(params[:game_id])
       frames = game.frames.order(:number).includes(:rolls)
-      game_state_service = GameStateService.new(game, frames)
+      score_calculator = ScoreCalculator.new(game, frames)
+      game_state_service = GameStateService.new(game, frames, score_calculator)
 
       # Check if game is in valid state
       unless game_state_service.valid_game_state?

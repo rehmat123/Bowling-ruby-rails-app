@@ -6,4 +6,4 @@ module BowlingRules
   MAX_ROLLS_PER_FRAME = 2
   MAX_ROLLS_TENTH_FRAME = 3
   MIN_PINS = 0
-end 
+end

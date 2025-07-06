@@ -284,11 +284,21 @@ This ensures all business logic receives validated, type-safe data.
 All business logic is implemented in a dedicated service layer (not in models):
 
 - **ScoreCalculator** (`app/services/score_calculator.rb`): Calculates frame-by-frame and total scores for a game, handling all strike, spare, and 10th frame rules.
-- **GameStateService** (`app/services/game_state_service.rb`): Determines game state, frame completion, next roll number, and provides game info in a structured format.
+- **GameStateService** (`app/services/game_state_service.rb`): Determines game state, frame completion, next roll number, and provides game info in a structured format with scores included.
 - **RollValidatorService** (`app/services/roll_validator_service.rb`): Validates roll input, enforces bowling rules for each frame, and provides detailed error messages for invalid rolls.
+
+**Design Patterns:**
+- **Dependency Injection**: Services use dependency injection for better testability and loose coupling (e.g., `GameStateService` accepts `ScoreCalculator` as a parameter)
+- **Single Responsibility**: Each service has a focused responsibility
+- **Shared Constants**: All bowling rules centralized in `BowlingRules` module
 
 **Shared Constants:**
 - **BowlingRules** (`app/lib/bowling_rules.rb`): Centralized module containing all bowling game constants (MAX_PINS, MAX_FRAMES, etc.) used across services for consistency and maintainability.
+
+**Performance Optimizations:**
+- Database queries are optimized with eager loading (`includes(:rolls)`)
+- Query results are cached in variables to avoid repeated database calls
+- Services share common data structures to minimize memory usage
 
 Controllers are thin and delegate all business logic to these services.
 

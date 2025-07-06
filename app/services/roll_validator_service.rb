@@ -8,11 +8,7 @@ class RollValidatorService
 
   # Validate if the roll is allowed
   def valid_roll?
-    return false unless valid_pins?
-    return false unless valid_roll_number?
-    return false unless valid_frame_rules?
-    
-    true
+    valid_pins? && valid_roll_number? && valid_frame_rules?
   end
 
   # Get validation errors

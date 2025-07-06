@@ -1,12 +1,16 @@
 class GameStateService
+  MAX_FRAMES = 10
+  MAX_PINS = 10
+  MAX_ROLLS_REGULAR = 2
+  MAX_ROLLS_TENTH_WITH_STRIKE_OR_SPARE = 3
   def initialize(game, frames = nil)
     @game = game
-    @frames = frames || game.frames.order(:number).includes(:rolls)
+    @frames = frames
   end
 
   # Check if the game is in a valid state
   def valid_game_state?
-    @frames.length == 10 && @frames.all? { |f| f.number <= 10 }
+    @frames.length == MAX_FRAMES && @frames.all? { |f| f.number <= 10 }
   end
 
   # Find the first frame that can accept a roll
@@ -16,9 +20,9 @@ class GameStateService
 
   # Check if a roll can be made in a specific frame
   def can_roll_in_frame?(frame)
-    rolls = frame.rolls.order(:roll_number)
+    rolls = ordered_rolls_for(frame)
     
-    if frame.number == 10
+    if frame.number == MAX_FRAMES
       !frame_complete_10th?(rolls)
     else
       !frame_complete_regular?(rolls)
@@ -37,15 +41,14 @@ class GameStateService
     @frames.all? { |frame| frame_complete?(frame) }
   end
 
-  # Check if a specific frame is complete
   def frame_complete?(frame)
-    rolls = frame.rolls.order(:roll_number)
-    
-    if frame.number == 10
-      frame_complete_10th?(rolls)
-    else
-      frame_complete_regular?(rolls)
-    end
+    rolls = ordered_rolls_for(frame)
+    frame.number == MAX_FRAMES ? frame_complete_10th?(rolls) : frame_complete_regular?(rolls)
+  end
+
+  def ordered_rolls_for(frame)
+    @ordered_rolls ||= {}
+    @ordered_rolls[frame.id] ||= frame.rolls.sort_by(&:roll_number)
   end
 
   # Get total number of rolls in the game
@@ -69,9 +72,9 @@ class GameStateService
   def frame_complete_regular?(rolls)
     return false if rolls.empty?
     
-    if rolls.first.pins == 10 # Strike
+    if rolls.first.pins == MAX_PINS # Strike
       true
-    elsif rolls.length >= 2 # Two rolls
+    elsif rolls.length >= MAX_ROLLS_REGULAR
       true
     else
       false
@@ -80,18 +83,19 @@ class GameStateService
 
   def frame_complete_10th?(rolls)
     return false if rolls.empty?
+
+    first = rolls[0]&.pins || 0
+    second = rolls[1]&.pins || 0
     
-    if rolls.first.pins == 10 # Strike
-      rolls.length >= 3
-    elsif rolls.length >= 2 && rolls[0].pins + rolls[1].pins == 10 # Spare
-      rolls.length >= 3
-    else # Open frame
-      rolls.length >= 2
+    if first == MAX_PINS || (first + second == MAX_PINS)
+        rolls.length >= MAX_ROLLS_TENTH_WITH_STRIKE_OR_SPARE
+      else
+        rolls.length >= MAX_ROLLS_REGULAR
     end
   end
 
   def frame_info(frame)
-    rolls = frame.rolls.order(:roll_number)
+    rolls = ordered_rolls_for(frame)
     {
       number: frame.number,
       rolls: rolls.map { |roll| { roll_number: roll.roll_number, pins: roll.pins } },

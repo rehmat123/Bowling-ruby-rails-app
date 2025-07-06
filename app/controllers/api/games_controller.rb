@@ -25,7 +25,8 @@ module Api
 
     def show
       game = Game.find(params[:id])
-      game_state_service = GameStateService.new(game)
+      frames = game.frames.order(:number).includes(:rolls)
+      game_state_service = GameStateService.new(game, frames)
       
       unless game_state_service.valid_game_state?
         render json: { error: 'Game is in an invalid state' }, status: :unprocessable_entity

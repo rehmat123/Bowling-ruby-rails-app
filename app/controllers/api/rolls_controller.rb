@@ -1,5 +1,7 @@
 require Rails.root.join('app/schemas/roll_schema')
 require Rails.root.join('app/schemas/game_schema')
+require Rails.root.join('app/services/game_state_service')
+require Rails.root.join('app/services/roll_validator_service')
 
 module Api
   class RollsController < ApplicationController
@@ -18,11 +20,16 @@ module Api
       end
       
       game = Game.find(params[:game_id])
-      frames = game.frames.order(:number)
+      game_state_service = GameStateService.new(game)
       
+      # Check if game is in valid state
+      unless game_state_service.valid_game_state?
+        render json: { error: 'Game is in an invalid state (not exactly 10 frames, or frame > 10 exists)' }, status: :unprocessable_entity
+        return
+      end
 
       # Find the first frame that can accept a roll
-      frame = frames.detect { |f| can_roll_in_frame?(f) }
+      frame = game_state_service.find_available_frame
       
       if frame.nil?
         render json: { 
@@ -32,8 +39,22 @@ module Api
         return
       end
       
-      roll_number = frame.rolls.count + 1
-      roll = frame.rolls.build(roll_number: roll_number, pins: result[:roll][:pins])
+      roll_number = game_state_service.next_roll_number(frame)
+      pins = result[:roll][:pins]
+      
+      # Validate the roll using the service
+      roll_validator = RollValidatorService.new(frame, roll_number, pins)
+      
+      unless roll_validator.valid_roll?
+        render json: { 
+          error: roll_validator.validation_errors.join(', '),
+          received_data: { pins: pins, frame: frame.number, roll: roll_number }
+        }, status: :unprocessable_entity
+        return
+      end
+      
+      # Create the roll
+      roll = frame.rolls.build(roll_number: roll_number, pins: pins)
       
       if roll.save
         response_data = { 
@@ -48,7 +69,7 @@ module Api
         render json: { 
           error: roll.errors.full_messages.join(', '),
           validation_errors: roll.errors.messages,
-          received_data: { pins: result[:roll][:pins], frame: frame.number, roll: roll_number }
+          received_data: { pins: pins, frame: frame.number, roll: roll_number }
         }, status: :unprocessable_entity
       end
     end
@@ -61,38 +82,6 @@ module Api
 
     def set_default_format
       request.format = :json
-    end
-
-    # Determines if a roll can be made in this frame
-    def can_roll_in_frame?(frame)
-      rolls = frame.rolls.order(:roll_number)
-      
-      # For frame 10, check if it's complete
-      if frame.number == 10
-        return !frame_complete?(frame)
-      end
-      
-      # For frames 1-9, check if frame is still open
-      if rolls.count == 0
-        return true # First roll always allowed
-      elsif rolls.count == 1
-        # Second roll only allowed if first roll wasn't a strike
-        return rolls.first.pins < 10
-      end
-      
-      false
-    end
-
-    # Determines if the 10th frame is complete
-    def frame_complete?(frame)
-      rolls = frame.rolls.order(:roll_number).pluck(:pins)
-      return false if rolls.size < 2
-      
-      if rolls[0] == 10 || rolls[0] + rolls[1] == 10
-        rolls.size >= 3
-      else
-        rolls.size >= 2
-      end
     end
   end
 end 

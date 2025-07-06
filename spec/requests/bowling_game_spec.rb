@@ -241,7 +241,7 @@ RSpec.describe 'Bowling Game API', type: :request do
       post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 3 } }.to_json, headers: headers
       expect(response).to have_http_status(:unprocessable_entity)
       body = JSON.parse(response.body)
-      expect(body['error']).to include('cannot exceed 2 for second roll in frame 1')
+      expect(body['error']).to include('Second roll cannot exceed 2 pins')
     end
 
     it 'allows exactly 10 pins in two rolls' do
@@ -324,16 +324,16 @@ RSpec.describe 'Bowling Game API', type: :request do
     end
 
     it 'rejects invalid game IDs' do
-      # Non-numeric game ID
+      # Non-numeric game ID - Rails will return 404 for non-existent games
       get "/api/v1/games/abc", headers: headers
-      expect(response).to have_http_status(:bad_request)
+      expect(response).to have_http_status(:not_found)
       body = JSON.parse(response.body)
-      expect(body['error']).to eq('Game ID must be a positive integer')
+      expect(body['error']).to eq('Game not found')
 
       get "/api/v1/games/abc/score", headers: headers
-      expect(response).to have_http_status(:bad_request)
+      expect(response).to have_http_status(:not_found)
       body = JSON.parse(response.body)
-      expect(body['error']).to eq('Game ID must be a positive integer')
+      expect(body['error']).to eq('Game not found')
 
       post "/api/v1/games/abc/rolls", params: { roll: { pins: 5 } }.to_json, headers: headers
       expect(response).to have_http_status(:not_found) # Rails routing handles this
@@ -360,11 +360,9 @@ RSpec.describe 'Bowling Game API', type: :request do
       # Check how many rolls we actually have
       get "/api/v1/games/#{game_id}", headers: headers
       body = JSON.parse(response.body)
-      puts "Total rolls after 20: #{body['total_rolls']}"
 
       # Try to roll again (should fail)
       post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 5 } }.to_json, headers: headers
-      puts "21st roll attempt: #{response.status}"
       expect(response).to have_http_status(:unprocessable_entity)
       body = JSON.parse(response.body)
       expect(body['error']).to eq('Game is already complete')
@@ -426,7 +424,7 @@ RSpec.describe 'Bowling Game API', type: :request do
       post "/api/v1/games/#{game_id}/rolls", params: { roll: { pins: 5 } }.to_json, headers: headers
       expect(response).to have_http_status(:unprocessable_entity)
       body = JSON.parse(response.body)
-      expect(body['error']).to include('cannot exceed 3 for second roll in frame 1')
+      expect(body['error']).to include('Second roll cannot exceed 3 pins')
     end
 
     it 'allows valid second roll in frame' do

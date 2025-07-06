@@ -1,3 +1,7 @@
+require Rails.root.join('app/schemas/game_schema')
+require Rails.root.join('app/services/score_calculator')
+require Rails.root.join('app/services/game_state_service')
+
 module Api
   class GamesController < ApplicationController
     rescue_from ActiveRecord::RecordNotFound, with: :not_found
@@ -6,56 +10,39 @@ module Api
     before_action :set_default_format
 
     def create
-      # Use dry-schema validation (even though no params required)
-      result = GameSchema.call(params.to_unsafe_h)
+      game = Game.create!
       
-      unless result.success?
-        render json: { error: "Invalid request parameters" }, status: :unprocessable_entity
-        return
+      # Create 10 frames for the game
+      10.times do |i|
+        game.frames.create!(number: i + 1)
       end
       
-      game = Game.create!
-      # Create 10 frames for the game
-      (1..10).each { |n| game.frames.create!(number: n) }
-      
-      render json: { 
+      render json: {
         game_id: game.id,
-        message: "New bowling game created successfully"
+        message: 'New bowling game created successfully'
       }, status: :created
     end
 
     def show
-      # Validate game ID format
-      unless params[:id].to_s.match?(/^\d+$/)
-        render json: { 
-          error: "Game ID must be a positive integer",
-          received_value: params[:id]
-        }, status: :bad_request
+      game = Game.find(params[:id])
+      game_state_service = GameStateService.new(game)
+      
+      unless game_state_service.valid_game_state?
+        render json: { error: 'Game is in an invalid state' }, status: :unprocessable_entity
         return
       end
       
-      game = Game.find(params[:id])
-      render json: { 
-        game_id: game.id, 
-        frames: game.frames.order(:number).as_json(only: [:id, :number]),
-        total_rolls: game.frames.joins(:rolls).count
-      }
+      render json: game_state_service.game_info, status: :ok
     end
 
     def score
-      # Validate game ID format
-      unless params[:id].to_s.match?(/^\d+$/)
-        render json: { 
-          error: "Game ID must be a positive integer",
-          received_value: params[:id]
-        }, status: :bad_request
-        return
-      end
-      
       game = Game.find(params[:id])
-      score_data = game.score_breakdown
+      score_calculator = ScoreCalculator.new(game)
       
-      render json: score_data
+      render json: {
+        total_score: score_calculator.calculate_score[:total_score],
+        frame_scores: score_calculator.calculate_score[:frame_scores]
+      }, status: :ok
     end
 
     private

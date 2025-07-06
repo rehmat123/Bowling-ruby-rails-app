@@ -13,7 +13,7 @@ module Api
       game = Game.create!
 
       # Create 10 frames for the game
-      10.times do |i|
+      BowlingRules::MAX_FRAMES.times do |i|
         game.frames.create!(number: i + 1)
       end
 
@@ -34,16 +34,17 @@ module Api
         return
       end
 
-      render json: game_state_service.game_info, status: :ok
+      render json: game_state_service.game_info
     end
 
     def score
       game = Game.find(params[:id])
       score_calculator = ScoreCalculator.new(game)
+      result = score_calculator.calculate_score
 
       render json: {
-        total_score: score_calculator.calculate_score[:total_score],
-        frame_scores: score_calculator.calculate_score[:frame_scores]
+        total_score: result[:total_score],
+        frame_scores: result[:frame_scores]
       }, status: :ok
     end
 

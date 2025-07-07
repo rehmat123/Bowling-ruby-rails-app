@@ -7,7 +7,6 @@ class GameStateService
     @score_calculator = score_calculator
   end
 
-  # Check if the game is in a valid state
   def valid_game_state?
     @frames.length == BowlingRules::MAX_FRAMES && @frames.all? { |f| f.number <= BowlingRules::MAX_FRAMES }
   end
@@ -55,10 +54,9 @@ class GameStateService
     @frames.sum { |frame| frame.rolls.count }
   end
 
-  # Get game information including scores
   def game_info
     score_data = @score_calculator.calculate_score
-    
+
     {
       game_id: @game.id,
       total_frames: @frames.length,

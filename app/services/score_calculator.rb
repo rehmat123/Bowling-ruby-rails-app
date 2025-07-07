@@ -32,7 +32,6 @@ class ScoreCalculator
     }
   end
 
-  # Calculate score for a specific frame
   def calculate_frame_score(frame_number, roll_index)
     return 0 if roll_index >= @rolls.length
 
@@ -45,13 +44,11 @@ class ScoreCalculator
     end
   end
 
-  # Check if current roll is a strike
   def strike?(roll_index)
     return false if roll_index >= @rolls.length
     @rolls[roll_index].pins == BowlingRules::MAX_PINS
   end
 
-  # Check if current two rolls make a spare
   def spare?(roll_index)
     return false if roll_index + 1 >= @rolls.length
     @rolls[roll_index].pins + @rolls[roll_index + 1].pins == BowlingRules::MAX_PINS
@@ -97,19 +94,16 @@ class ScoreCalculator
     score
   end
 
-  # Get total number of rolls
   def total_rolls
     @rolls.length
   end
 
-  # Check if game is complete
   def game_complete?
     return false if @frames.length != BowlingRules::MAX_FRAMES
 
     @frames.all? { |frame| frame_complete?(frame) }
   end
 
-  # Check if a specific frame is complete
   def frame_complete?(frame)
     rolls = frame.rolls.order(:roll_number)
 
